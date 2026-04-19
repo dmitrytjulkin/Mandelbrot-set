@@ -5,14 +5,48 @@
 #define ROWS_NUM 750
 #define RADIUS 2
 
-int main()
-{
-    sf::View view(sf::FloatRect({0, 0}, {COLS_NUM, ROWS_NUM}));
-    sf::RenderWindow window(sf::VideoMode(COLS_NUM, ROWS_NUM), "Mandelbrot");
+void SetPixelsColor (std::vector<sf::Vertex>* pixels,
+                     double offset_re, double offset_im);
 
-    std::vector<sf::Vertex> pixels(COLS_NUM * ROWS_NUM);
+int main ()
+{
+    sf::RenderWindow window (sf::VideoMode (COLS_NUM, ROWS_NUM), "Mandelbrot");
+
+    std::vector<sf::Vertex> pixels (COLS_NUM * ROWS_NUM);
     double offset_re = COLS_NUM / 2, offset_im = ROWS_NUM / 2;
 
+    sf::Event event = {};
+    sf::Clock clock = {};
+    double last_time = 0, current_rime = 0;
+    double fps = 0;
+
+    while (window.isOpen ())
+    {
+        SetPixelsColor (&pixels, offset_re, offset_im);
+
+        while (window.pollEvent (event))
+            if (event.type == sf::Event::Closed)
+                window.close();
+
+        // if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) offset_re -= 50;
+        // if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) offset_re += 50;
+        // if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) offset_im -= 50;
+        // if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) offset_im += 50;
+
+        current_time = clock.restart().AsSeconds();
+        fps = 1 / (current_time - last_time);
+        last_time = current_time;
+
+        window.clear ();
+        window.draw (pixels.data (), pixels.size (), sf::Points);
+        window.display ();
+    }
+
+    return 0;
+}
+
+void SetPixelsColor (std::vector<sf::Vertex>* pixels, double offset_re, double offset_im)
+{
     for (int x = 0; x < COLS_NUM; ++x) {
         for (int y = 0; y < ROWS_NUM; ++y) {
             double re_0 = (x - offset_re) * 4 / COLS_NUM;
@@ -24,40 +58,16 @@ int main()
                 double tmp = re_n;
                 re_n = re_n * re_n - im_n * im_n + re_0;
                 im_n = 2 * tmp * im_n + im_0;
+
                 ++n;
             }
 
-            if (n <= 255){
-                pixels[x * COLS_NUM + y] =
-                    sf::Vertex (sf::Vector2f (x, y),
-                                sf::Color (n, (n * 210) % 256, (n * 123) % 256));
-            }
+            if (n > 255)
+                continue;
+
+            (*pixels)[x * COLS_NUM + y] =
+                sf::Vertex (sf::Vector2f (x, y),
+                            sf::Color (n, (n * 210) % 256, (n * 123) % 256));
         }
     }
-
-    while (window.isOpen())
-    {
-        sf::Event event;
-        while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed)
-                window.close();
-
-        // sf::Vector2f view_center = sf::View::getCenter(view)
-            // if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
-            //     view.move (0.f, -5.f);
-            if (event.type == sf::Event::KeyPressed) {
-                if (event.key.code == sf::Keyboard::Left)
-                    view.move (0.f, -100.f);
-                if (event.key.code == sf::Keyboard::Right)
-                    view.move (0.f, 100.f);
-            }
-        }
-
-        window.clear();
-        window.setView(view);
-        window.draw (pixels.data (), pixels.size (), sf::Points);
-        window.display();
-    }
-
-    return 0;
 }
