@@ -1,36 +1,35 @@
 #include <SFML/Graphics.hpp>
+#include <vector>
 
-#define COLUMNS_NUM 200
-#define ROWS_NUM 200
-#define RADIUS 50
+#define COLS_NUM 750
+#define ROWS_NUM 750
+#define RADIUS 2
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode(COLUMNS_NUM, ROWS_NUM), "Mandelbrot");
+    sf::RenderWindow window(sf::VideoMode(COLS_NUM, ROWS_NUM), "Mandelbrot");
 
-    sf::Vertex vertices[COLUMNS_NUM * ROWS_NUM] = {};
+    std::vector<sf::Vertex> pixels(COLS_NUM * ROWS_NUM);
+    double offset_re = COLS_NUM / 2, offset_im = ROWS_NUM / 2;
 
-    int re_p0 = COLUMNS_NUM / 2, im_p0 = ROWS_NUM / 2;
+    for (int x = 0; x < COLS_NUM; ++x) {
+        for (int y = 0; y < ROWS_NUM; ++y) {
+            double re_0 = (x - offset_re) * 4 / COLS_NUM;
+            double im_0 = (y - offset_im) * 4 / ROWS_NUM;
+            double re_n = 0, im_n = 0;
 
-    for (int rows = 0; rows < COLUMNS_NUM; ++rows) {
-        for (int cols = 0; cols < COLUMNS_NUM; ++cols) {
-            int re_pn = rows + re_p0, im_pn = cols + im_p0;
+            int n = 0;
+            while (n < 256 && RADIUS * RADIUS >= re_n * re_n + im_n * im_n) {
+                double tmp = re_n;
+                re_n = re_n * re_n - im_n * im_n + re_0;
+                im_n = 2 * tmp * im_n + im_0;
+                ++n;
+            }
 
-            for (int n = 0; n < 256; ++n) {
-                int re_pn1 = re_pn * re_pn - im_pn * im_pn + re_p0;
-                int im_pn1 = 2 * re_pn * im_pn + im_p0;
-                re_pn = re_pn1;
-                im_pn = im_pn1;
-
-                // if (n == 255)
-                //    vertices[ROWS_NUM * (rows + re_p0) + (cols + im_p0)] = sf::Vertex(
-                //             sf::Vector2f(cols + im_p0, rows + re_p0), sf::Color::Black);
-
-                if (RADIUS * RADIUS < re_pn1 * re_pn1 + im_pn1 * im_pn1) {
-                    vertices[ROWS_NUM * (rows + re_p0) + cols + im_p0] = sf::Vertex(sf::Vector2f(cols + im_p0, rows + re_p0), sf::Color (n, 255 - n, 0, 255));
-
-                    break;
-                }
+            if (n <= 255){
+                pixels[x * COLS_NUM + y] =
+                    sf::Vertex (sf::Vector2f (x, y),
+                                sf::Color (n, (n * 210) % 256, (n * 123) % 256));
             }
         }
     }
@@ -38,13 +37,12 @@ int main()
     while (window.isOpen())
     {
         sf::Event event;
-
         while (window.pollEvent(event))
             if (event.type == sf::Event::Closed)
                 window.close();
 
         window.clear();
-        window.draw(vertices, COLUMNS_NUM * ROWS_NUM, sf::Points);
+        window.draw (pixels.data (), pixels.size (), sf::Points);
         window.display();
     }
 
