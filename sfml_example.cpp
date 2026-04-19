@@ -7,6 +7,7 @@
 
 int main()
 {
+    sf::View view(sf::FloatRect({0, 0}, {COLS_NUM, ROWS_NUM}));
     sf::RenderWindow window(sf::VideoMode(COLS_NUM, ROWS_NUM), "Mandelbrot");
 
     std::vector<sf::Vertex> pixels(COLS_NUM * ROWS_NUM);
@@ -37,11 +38,23 @@ int main()
     while (window.isOpen())
     {
         sf::Event event;
-        while (window.pollEvent(event))
+        while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed)
                 window.close();
 
+        // sf::Vector2f view_center = sf::View::getCenter(view)
+            // if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
+            //     view.move (0.f, -5.f);
+            if (event.type == sf::Event::KeyPressed) {
+                if (event.key.code == sf::Keyboard::Left)
+                    view.move (0.f, -100.f);
+                if (event.key.code == sf::Keyboard::Right)
+                    view.move (0.f, 100.f);
+            }
+        }
+
         window.clear();
+        window.setView(view);
         window.draw (pixels.data (), pixels.size (), sf::Points);
         window.display();
     }
