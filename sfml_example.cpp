@@ -54,7 +54,7 @@ int main ()
 
 
         char fps_phrase[21] = {};
-        sprintf (fps_phrase, "FPS = %lg.2", fps);
+        sprintf (fps_phrase, "FPS = %.2lg", fps);
         text.setFont (arial_font);
         text.setString (fps_phrase);
         text.setCharacterSize (48);
