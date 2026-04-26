@@ -45,10 +45,8 @@ int main ()
 
         // if (event.type == sf::Event::Closed)
         //     window.close();
-
-        // if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-        //     printf ("A PRESSED\n");
-
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Dash))
+            printf ("SUB WAS PRESSED\n");
         printf("check keyboard\n");
 
         TransformView (&offs_re, &offs_im, VIEW_OFFSET_VAL, &scale);
@@ -78,13 +76,13 @@ int main ()
 void SetPixelsColor (/*sf::Image* image,*/ sf::VertexArray* pixels,
                      float offs_re, float offs_im, float scale)
 {
-    float general_offs_re = OFFS_CENT_RE + offs_re * scale;
-    float general_offs_im = OFFS_CENT_IM + offs_im * scale;
+    float general_offs_re = (OFFS_CENT_RE + offs_re) * scale;
+    float general_offs_im = (OFFS_CENT_IM + offs_im) * scale;
 
     for (int x = 0; x < COLS_NUM; ++x) {
         for (int y = 0; y < ROWS_NUM; ++y) {
-            float re_0 = (x - general_offs_re) * 4 / COLS_NUM;
-            float im_0 = (y - general_offs_re) * 4 / ROWS_NUM;
+            float re_0 = (scale * x - general_offs_re) * 4 / COLS_NUM;
+            float im_0 = (scale * y - general_offs_im) * 4 / ROWS_NUM;
             float re_n = 0, im_n = 0;
 
             int n = 0;
@@ -97,12 +95,15 @@ void SetPixelsColor (/*sf::Image* image,*/ sf::VertexArray* pixels,
                 ++n;
             }
 
-            if (n >= NUM_TO_STOP_CALC)
+            if (n >= NUM_TO_STOP_CALC) {
+                sf::Color color = sf::Color::Black;
+                (*pixels)[x * COLS_NUM + y] = sf::Vertex (sf::Vector2f (x, y), color);
+
                 continue;
+            }
 
             sf::Color color = sf::Color (n, (n * 210) % 256, (n * 123) % 256);
-            (*pixels)[x * COLS_NUM + y] =
-                sf::Vertex (sf::Vector2f (x, y), color);
+            (*pixels)[x * COLS_NUM + y] = sf::Vertex (sf::Vector2f (x, y), color);
 
             // image->setPixel (x - offs_re, y - offs_im, color);
         }
@@ -111,13 +112,13 @@ void SetPixelsColor (/*sf::Image* image,*/ sf::VertexArray* pixels,
 
 void TransformView (float* x_coord, float* y_coord, int step, float* scale)
 {
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) *x_coord -= step;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) *x_coord += step;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) *x_coord += step;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) *x_coord -= step;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) *y_coord -= step;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) *y_coord += step;
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Equal))
+        *scale /= SCALE_MULTIPLIER;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Dash))
         *scale *= SCALE_MULTIPLIER;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Subtract))
-        *scale *= 1 / SCALE_MULTIPLIER;
 }
