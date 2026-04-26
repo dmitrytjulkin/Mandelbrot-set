@@ -4,8 +4,8 @@
 
 const int COLS_NUM     = 500;
 const int ROWS_NUM     = 500;
-const int OFFS_CENT_RE = 250;
-const int OFFS_CENT_IM = 250;
+const int OFFS_CENT_RE = COLS_NUM / 2;
+const int OFFS_CENT_IM = ROWS_NUM / 2;
 const int RADIUS       = 2;
 
 const int SCALE_MULTIPLIER = 2;
@@ -13,16 +13,18 @@ const int VIEW_OFFSET_VAL  = 50;
 
 const int NUM_TO_STOP_CALC = 256;
 
-void TransformView  (float* x_coord, float* y_coord, int step, float* scale);
-void SetPixelsColor (/*sf::Image* image, */sf::VertexArray* pixels,
+#define IS_PRESSED(key) sf::Keyboard::isKeyPressed(sf::Keyboard::key)
+
+void TransformView  (float* x_coord, float* y_coord, int step,
+                     float* scale, bool* need_update);
+void SetPixelsColor (sf::VertexArray* pixels,
                      float offs_re, float offs_im, float scale);
 
 int main ()
 {
-    // sf::Image image = {};
-    // image.create(COLS_NUM, ROWS_NUM, sf::Color::Black);
     sf::RenderWindow window (sf::VideoMode (COLS_NUM, ROWS_NUM), "Mandelbrot");
     printf("Window created\n");
+    window.setFramerateLimit(0);
 
     sf::VertexArray pixels (sf::Points, COLS_NUM * ROWS_NUM);
     sf::Event event = {};
@@ -36,20 +38,20 @@ int main ()
     float scale = 1;
     float delta_time = 0;
     float fps = 0;
+    bool need_update = true;
 
     while (window.isOpen ())
     {
         printf("set pixel start\n");
-        SetPixelsColor (/*&image,*/ &pixels, offs_re, offs_im, scale);
+        SetPixelsColor (&pixels, offs_re, offs_im, scale);
         printf("set pixel end\n");
 
-        // if (event.type == sf::Event::Closed)
-        //     window.close();
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Dash))
-            printf ("SUB WAS PRESSED\n");
+        // if (sf::Keyboard::isKeyPressed(sf::Keyboard::Dash))
+        //     printf ("SUB WAS PRESSED\n");
         printf("check keyboard\n");
 
-        TransformView (&offs_re, &offs_im, VIEW_OFFSET_VAL, &scale);
+        TransformView (&offs_re, &offs_im, VIEW_OFFSET_VAL,
+                       &scale, &need_update);
 
         delta_time = clock.restart().asSeconds();
         fps = 1 / delta_time;
@@ -62,7 +64,10 @@ int main ()
         text.setCharacterSize (48);
         text.setPosition (10.f, 10.f);
 
+        if (!need_update) continue;
+
         printf("window draw start\n");
+        need_update = false;
         window.clear ();
         window.draw (pixels);
         window.draw (text);
@@ -104,21 +109,40 @@ void SetPixelsColor (/*sf::Image* image,*/ sf::VertexArray* pixels,
 
             sf::Color color = sf::Color (n, (n * 210) % 256, (n * 123) % 256);
             (*pixels)[x * COLS_NUM + y] = sf::Vertex (sf::Vector2f (x, y), color);
-
-            // image->setPixel (x - offs_re, y - offs_im, color);
         }
     }
 }
 
-void TransformView (float* x_coord, float* y_coord, int step, float* scale)
+void TransformView (float* x_coord, float* y_coord, int step,
+                    float* scale, bool* need_update)
 {
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) *x_coord += step;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) *x_coord -= step;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) *y_coord -= step;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) *y_coord += step;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
+        *x_coord += step;
+        *need_update = true;
+    }
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Equal))
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
+        *x_coord -= step;
+        *need_update = true;
+    }
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+        *y_coord -= step;
+        *need_update = true;
+    }
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
+        *y_coord += step;
+        *need_update = true;
+    }
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Equal)) {
         *scale /= SCALE_MULTIPLIER;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Dash))
+        *need_update = true;
+    }
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Dash)) {
         *scale *= SCALE_MULTIPLIER;
+        *need_update = true;
+    }
 }
