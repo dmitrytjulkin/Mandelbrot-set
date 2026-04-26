@@ -1,97 +1,122 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
+#include <unistd.h>
 
-#define COLS_NUM 750
-#define ROWS_NUM 750
-#define RADIUS 2
+const int COLS_NUM     = 500;
+const int ROWS_NUM     = 500;
+const int OFFS_CENT_RE = 250;
+const int OFFS_CENT_IM = 250;
+const int RADIUS       = 2;
 
-void SetPixelsColor (std::vector<sf::Vertex>* pixels,
-                     double offset_re, double offset_im);
+const int SCALE_MULTIPLIER = 2;
+const int VIEW_OFFSET_VAL  = 50;
 
-// int main ()
-// {
-//     sf::RenderWindow window (sf::VideoMode (1280, 720), "Smth");
-//     window.setFramerateLimit (60);
-//
-//     sf::Font arial_font = {};
-//     arial_font =
-// }
+const int NUM_TO_STOP_CALC = 256;
 
+void TransformView (int x_coord, int y_coord, int step, float scale);
+
+void SetPixelsColor (/*sf::Image* image, */sf::VertexArray* pixels,
+                     float offs_re, float offs_im, float scale);
 
 int main ()
 {
+    // sf::Image image = {};
+    // image.create(COLS_NUM, ROWS_NUM, sf::Color::Black);
     sf::RenderWindow window (sf::VideoMode (COLS_NUM, ROWS_NUM), "Mandelbrot");
+    printf("Window created\n");
 
-    std::vector<sf::Vertex> pixels (COLS_NUM * ROWS_NUM);
-    double offset_re = COLS_NUM / 2, offset_im = ROWS_NUM / 2;
-
+    sf::VertexArray pixels (sf::Points, COLS_NUM * ROWS_NUM);
     sf::Event event = {};
     sf::Clock clock = {};
     sf::Text text = {};
-
     sf::Font arial_font = {};
     arial_font.loadFromFile ("/root/TDA projects/Mandelbrot-set/arial.ttf");
+    printf("Font loaded\n");
 
-    double last_time = 0, current_time = 0;
-    double fps = 0;
+    float offs_re = 0, offs_im = 0;
+    float scale = 1;
+    float last_time = 0, current_time = 0;
+    float fps = 0;
 
     while (window.isOpen ())
     {
-        SetPixelsColor (&pixels, offset_re, offset_im);
+        printf("set pixel start\n");
+        SetPixelsColor (/*&image,*/ &pixels, offs_re, offs_im, scale);
+        printf("set pixel end\n");
 
-        while (window.pollEvent (event))
-            if (event.type == sf::Event::Closed)
-                window.close();
+        if (event.type == sf::Event::Closed)
+            window.close();
 
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) offset_re -= 50;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) offset_re += 50;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) offset_im -= 50;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) offset_im += 50;
+        printf("check keyboard\n");
+
+        TransformView (x_coord, y_coord, step, scale);
 
         current_time = clock.restart().asSeconds();
         fps = 1 / (current_time - last_time);
         last_time = current_time;
-
+        printf("fps = %.2lg\n", fps);
 
         char fps_phrase[21] = {};
         sprintf (fps_phrase, "FPS = %.2lg", fps);
         text.setFont (arial_font);
         text.setString (fps_phrase);
         text.setCharacterSize (48);
-        text.setPosition(10.f, 10.f);
+        text.setPosition (10.f, 10.f);
 
+        printf("window draw start\n");
         window.clear ();
-        window.draw (pixels.data (), pixels.size (), sf::Points);
-        window.draw (text);
+        window.draw (pixels);
+        // window.draw (text);
         window.display ();
+        printf("window draw end\n");
     }
 
     return 0;
 }
 
-void SetPixelsColor (std::vector<sf::Vertex>* pixels, double offset_re, double offset_im)
+void SetPixelsColor (/*sf::Image* image,*/ sf::VertexArray* pixels,
+                     float offs_re, float offs_im, float scale)
 {
-    for (int x = 0; x < COLS_NUM; ++x) {
-        for (int y = 0; y < ROWS_NUM; ++y) {
-            double re_0 = (x - offset_re) * 4 / COLS_NUM;
-            double im_0 = (y - offset_im) * 4 / ROWS_NUM;
-            double re_n = 0, im_n = 0;
+    float general_offs_re = OFFS_CENT_RE + offs_re * scale;
+    float general_offs_im = OFFS_CENT_IM + offs_im * scale;
+
+    for (int x = general_offs_re; x < COLS_NUM + general_offs_re; ++x) {
+        for (int y = general_offs_im; y < ROWS_NUM + general_offs_im; ++y) {
+            float re_0 = x * 4 / COLS_NUM;
+            float im_0 = y * 4 / ROWS_NUM;
+            float re_n = 0, im_n = 0;
 
             int n = 0;
-            while (n < 256 && RADIUS * RADIUS >= re_n * re_n + im_n * im_n) {
-                double tmp = re_n;
+            while (RADIUS * RADIUS >= re_n * re_n + im_n * im_n
+                   && n < NUM_TO_STOP_CALC) {
+                float tmp = re_n;
                 re_n = re_n * re_n - im_n * im_n + re_0;
                 im_n = 2 * tmp * im_n + im_0;
 
                 ++n;
             }
 
-            if (n > 255)
+            if (n >= NUM_TO_STOP_CALC)
                 continue;
 
-            (*pixels)[x * COLS_NUM + y] =
-                sf::Vertex (sf::Vector2f (x, y),
-                            sf::Color (n, (n * 210) % 256, (n * 123) % 256));
+            sf::Color color = sf::Color (n, (n * 210) % 256, (n * 123) % 256);
+            (*pixels)[(x - general_offs_re) * COLS_NUM + (y - general_offs_im)] =
+                sf::Vertex (sf::Vector2f (x, y), color);
+
+            // image->setPixel (x - offs_re, y - offs_im, color);
         }
     }
+}
+
+void TransformView (int x_coord, int y_coord, int step, float scale)
+{
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) x_coord -= step;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) x_coord += step;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) y_coord -= step;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) y_coord += step;
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Equal))
+        scale *= SCALE_MULTIPLIER;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Subtract))
+        scale *= 1 / SCALE_MULTIPLIER;
 }
