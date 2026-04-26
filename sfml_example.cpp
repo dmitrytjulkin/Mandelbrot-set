@@ -13,8 +13,7 @@ const int VIEW_OFFSET_VAL  = 50;
 
 const int NUM_TO_STOP_CALC = 256;
 
-void TransformView (int x_coord, int y_coord, int step, float scale);
-
+void TransformView  (float* x_coord, float* y_coord, int step, float* scale);
 void SetPixelsColor (/*sf::Image* image, */sf::VertexArray* pixels,
                      float offs_re, float offs_im, float scale);
 
@@ -35,7 +34,7 @@ int main ()
 
     float offs_re = 0, offs_im = 0;
     float scale = 1;
-    float last_time = 0, current_time = 0;
+    float delta_time = 0;
     float fps = 0;
 
     while (window.isOpen ())
@@ -44,16 +43,18 @@ int main ()
         SetPixelsColor (/*&image,*/ &pixels, offs_re, offs_im, scale);
         printf("set pixel end\n");
 
-        if (event.type == sf::Event::Closed)
-            window.close();
+        // if (event.type == sf::Event::Closed)
+        //     window.close();
+
+        // if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+        //     printf ("A PRESSED\n");
 
         printf("check keyboard\n");
 
-        TransformView (x_coord, y_coord, step, scale);
+        TransformView (&offs_re, &offs_im, VIEW_OFFSET_VAL, &scale);
 
-        current_time = clock.restart().asSeconds();
-        fps = 1 / (current_time - last_time);
-        last_time = current_time;
+        delta_time = clock.restart().asSeconds();
+        fps = 1 / delta_time;
         printf("fps = %.2lg\n", fps);
 
         char fps_phrase[21] = {};
@@ -66,7 +67,7 @@ int main ()
         printf("window draw start\n");
         window.clear ();
         window.draw (pixels);
-        // window.draw (text);
+        window.draw (text);
         window.display ();
         printf("window draw end\n");
     }
@@ -80,10 +81,10 @@ void SetPixelsColor (/*sf::Image* image,*/ sf::VertexArray* pixels,
     float general_offs_re = OFFS_CENT_RE + offs_re * scale;
     float general_offs_im = OFFS_CENT_IM + offs_im * scale;
 
-    for (int x = general_offs_re; x < COLS_NUM + general_offs_re; ++x) {
-        for (int y = general_offs_im; y < ROWS_NUM + general_offs_im; ++y) {
-            float re_0 = x * 4 / COLS_NUM;
-            float im_0 = y * 4 / ROWS_NUM;
+    for (int x = 0; x < COLS_NUM; ++x) {
+        for (int y = 0; y < ROWS_NUM; ++y) {
+            float re_0 = (x - general_offs_re) * 4 / COLS_NUM;
+            float im_0 = (y - general_offs_re) * 4 / ROWS_NUM;
             float re_n = 0, im_n = 0;
 
             int n = 0;
@@ -100,7 +101,7 @@ void SetPixelsColor (/*sf::Image* image,*/ sf::VertexArray* pixels,
                 continue;
 
             sf::Color color = sf::Color (n, (n * 210) % 256, (n * 123) % 256);
-            (*pixels)[(x - general_offs_re) * COLS_NUM + (y - general_offs_im)] =
+            (*pixels)[x * COLS_NUM + y] =
                 sf::Vertex (sf::Vector2f (x, y), color);
 
             // image->setPixel (x - offs_re, y - offs_im, color);
@@ -108,15 +109,15 @@ void SetPixelsColor (/*sf::Image* image,*/ sf::VertexArray* pixels,
     }
 }
 
-void TransformView (int x_coord, int y_coord, int step, float scale)
+void TransformView (float* x_coord, float* y_coord, int step, float* scale)
 {
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) x_coord -= step;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) x_coord += step;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) y_coord -= step;
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) y_coord += step;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) *x_coord -= step;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) *x_coord += step;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) *y_coord -= step;
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) *y_coord += step;
 
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Equal))
-        scale *= SCALE_MULTIPLIER;
+        *scale *= SCALE_MULTIPLIER;
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Subtract))
-        scale *= 1 / SCALE_MULTIPLIER;
+        *scale *= 1 / SCALE_MULTIPLIER;
 }
