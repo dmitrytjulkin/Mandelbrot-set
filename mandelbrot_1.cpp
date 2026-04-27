@@ -42,13 +42,7 @@ int main ()
 
     while (window.isOpen ())
     {
-        printf("set pixel start\n");
         SetPixelsColor (&pixels, offs_re, offs_im, scale);
-        printf("set pixel end\n");
-
-        // if (sf::Keyboard::isKeyPressed(sf::Keyboard::Dash))
-        //     printf ("SUB WAS PRESSED\n");
-        printf("check keyboard\n");
 
         TransformView (&offs_re, &offs_im, VIEW_OFFSET_VAL,
                        &scale, &need_update);
@@ -64,7 +58,10 @@ int main ()
         text.setCharacterSize (48);
         text.setPosition (10.f, 10.f);
 
-        if (!need_update) continue;
+        // if (!need_update) continue;
+        printf ("the x offset %0.6lg\n", offs_re);
+        printf ("the y offset %0.6lg\n", offs_im);
+        printf ("the scale    %0.6lg\n", scale);
 
         printf("window draw start\n");
         need_update = false;
@@ -78,7 +75,7 @@ int main ()
     return 0;
 }
 
-void SetPixelsColor (/*sf::Image* image,*/ sf::VertexArray* pixels,
+void SetPixelsColor (sf::VertexArray* pixels,
                      float offs_re, float offs_im, float scale)
 {
     float general_offs_re = (OFFS_CENT_RE + offs_re) * scale;
@@ -116,32 +113,17 @@ void SetPixelsColor (/*sf::Image* image,*/ sf::VertexArray* pixels,
 void TransformView (float* x_coord, float* y_coord, int step,
                     float* scale, bool* need_update)
 {
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {
-        *x_coord += step;
-        *need_update = true;
-    }
+    if (IS_PRESSED(A)) {*x_coord += step; *need_update = true;}
+    if (IS_PRESSED(D)) {*x_coord -= step; *need_update = true;}
+    if (IS_PRESSED(S)) {*y_coord -= step; *need_update = true;}
+    if (IS_PRESSED(W)) {*y_coord += step; *need_update = true;}
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
-        *x_coord -= step;
-        *need_update = true;
-    }
-
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
-        *y_coord -= step;
-        *need_update = true;
-    }
-
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
-        *y_coord += step;
-        *need_update = true;
-    }
-
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Equal)) {
+    if (IS_PRESSED(Equal)) {
         *scale /= SCALE_MULTIPLIER;
         *need_update = true;
     }
 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Dash)) {
+    if (IS_PRESSED(Dash)) {
         *scale *= SCALE_MULTIPLIER;
         *need_update = true;
     }
