@@ -1,23 +1,15 @@
 #include <SFML/Graphics.hpp>
 
-const int COLS_NUM     = 500;
-const int ROWS_NUM     = 500;
-const int OFFS_CENT_RE = COLS_NUM / 2;
-const int OFFS_CENT_IM = ROWS_NUM / 2;
-const int RADIUS       = 2;
+#include "mandelbrot.h"
 
 const int SCALE_MULTIPLIER = 2;
 const int VIEW_OFFSET_VAL  = 50;
-
-const int NUM_TO_STOP_CALC = 256;
 
 #define IS_PRESSED(key) sf::Keyboard::isKeyPressed(sf::Keyboard::key)
 
 void TransformView  (float* x_coord, float* y_coord, int step,
                      float* scale, bool* need_update);
-void SetPixelsColor (sf::VertexArray* pixels,
-                     float offs_re, float offs_im, float scale);
-void SetFpsPhrase   (sf::Text text, float delta_time, sf::Font arial_font);
+void SetFpsPhrase   (sf::Text* text, float delta_time, sf::Font arial_font);
 void PrintWindow    (sf::RenderWindow* window, sf::VertexArray pixels, sf::Text text);
 
 int main ()
@@ -28,16 +20,19 @@ int main ()
     sf::VertexArray pixels (sf::Points, COLS_NUM * ROWS_NUM);
     sf::Event event = {};
     sf::Clock clock = {};
+
     sf::Text text = {};
     sf::Font arial_font = {};
     arial_font.loadFromFile ("/root/TDA projects/Mandelbrot-set/arial.ttf");
-    printf("Font loaded\n");
+    text.setFont (arial_font);
+    text.setCharacterSize (36);
+    text.setPosition (5.f, 5.f);
 
     float offs_re = 0, offs_im = 0;
-    float scale = 1;
-    float delta_time = 0;
-    float fps = 0;
-    bool need_update = true;
+    float scale       = 1;
+    float delta_time  = 0;
+    float fps         = 0;
+    bool  need_update = true;
 
     while (window.isOpen ())
     {
@@ -48,7 +43,7 @@ int main ()
         TransformView (&offs_re, &offs_im, VIEW_OFFSET_VAL,
                        &scale, &need_update);
 
-        SetFpsPhrase (text, delta_time, arial_font);
+        SetFpsPhrase (&text, delta_time, arial_font);
 
         if (!need_update) continue;
         need_update = false;
@@ -61,49 +56,6 @@ int main ()
     }
 
     return 0;
-}
-
-void SetPixelsColor (sf::VertexArray* pixels,
-                     float offs_re, float offs_im, float scale)
-{
-    float general_offs_re = OFFS_CENT_RE + offs_re;
-    float general_offs_im = OFFS_CENT_IM + offs_im;
-
-    float multiplier_x = 4.f / COLS_NUM * scale;
-    float multiplier_y = 4.f / ROWS_NUM * scale;
-
-    float x_angle_coef = multiplier_x;
-    float y_angle_coef = multiplier_y;
-    float x_free_coef  = multiplier_x * general_offs_re;
-    float y_free_coef  = multiplier_y * general_offs_im;
-
-    for (int x = 0; x < COLS_NUM; ++x) {
-        for (int y = 0; y < ROWS_NUM; ++y) {
-            float re_0 = x_angle_coef * x - x_free_coef;
-            float im_0 = y_angle_coef * y - y_free_coef;
-            float re_n = 0, im_n = 0;
-
-            int n = 0;
-            while (RADIUS * RADIUS >= re_n * re_n + im_n * im_n
-                   && n < NUM_TO_STOP_CALC) {
-                float tmp = re_n;
-                re_n = re_n * re_n - im_n * im_n + re_0;
-                im_n = 2 * tmp * im_n + im_0;
-
-                ++n;
-            }
-
-            if (n >= NUM_TO_STOP_CALC) {
-                sf::Color color = sf::Color::Black;
-                (*pixels)[x * COLS_NUM + y] = sf::Vertex (sf::Vector2f (x, y), color);
-
-                continue;
-            }
-
-            sf::Color color = sf::Color (n, (n * 210) % 256, (n * 123) % 256);
-            (*pixels)[x * COLS_NUM + y] = sf::Vertex (sf::Vector2f (x, y), color);
-        }
-    }
 }
 
 void TransformView (float* x_coord, float* y_coord, int step,
@@ -125,7 +77,7 @@ void TransformView (float* x_coord, float* y_coord, int step,
     }
 }
 
-void SetFpsPhrase (sf::Text text, float delta_time, sf::Font arial_font)
+void SetFpsPhrase (sf::Text* text, float delta_time, sf::Font arial_font)
 {
     float fps = 1 / delta_time;
     printf("fps = %.2lg\n", fps);
@@ -133,10 +85,7 @@ void SetFpsPhrase (sf::Text text, float delta_time, sf::Font arial_font)
     char fps_phrase[21] = {};
     sprintf (fps_phrase, "FPS = %.2lg", fps);
 
-    text.setFont (arial_font);
-    text.setString (fps_phrase);
-    text.setCharacterSize (36);
-    text.setPosition (10.f, 10.f);
+    text->setString (fps_phrase);
 }
 
 void PrintWindow (sf::RenderWindow* window, sf::VertexArray pixels, sf::Text text)

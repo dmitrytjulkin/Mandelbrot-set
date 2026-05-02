@@ -1,0 +1,7 @@
+#pragma once
+
+const int COLS_NUM     = 500;
+const int ROWS_NUM     = 500;
+
+void SetPixelsColor (sf::VertexArray* pixels,
+                     float offs_re, float offs_im, float scale);
