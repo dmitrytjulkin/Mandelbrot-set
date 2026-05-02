@@ -61,7 +61,20 @@ int main ()
 void TransformView (float* x_coord, float* y_coord, int step,
                     float* scale, bool* need_update)
 {
+    if (IS_PRESSED(A)) {*x_coord += step; *need_update = true;}
+    if (IS_PRESSED(D)) {*x_coord -= step; *need_update = true;}
+    if (IS_PRESSED(S)) {*y_coord -= step; *need_update = true;}
+    if (IS_PRESSED(W)) {*y_coord += step; *need_update = true;}
 
+    if (IS_PRESSED(Equal)) {
+        *scale /= SCALE_MULTIPLIER;
+        *need_update = true;
+    }
+
+    if (IS_PRESSED(Dash)) {
+        *scale *= SCALE_MULTIPLIER;
+        *need_update = true;
+    }
 }
 
 void SetFpsPhrase (sf::Text* text, float delta_time)
