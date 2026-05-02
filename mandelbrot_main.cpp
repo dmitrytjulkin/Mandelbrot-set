@@ -3,7 +3,7 @@
 #include "mandelbrot.h"
 
 const int SCALE_MULTIPLIER = 2;
-const int VIEW_OFFSET_VAL  = 50;
+const int VIEW_OFFSET_VAL  = 25;
 
 #define IS_PRESSED(key) sf::Keyboard::isKeyPressed(sf::Keyboard::key)
 
@@ -36,12 +36,12 @@ int main ()
 
     while (window.isOpen ())
     {
-        clock.restart();
-        SetPixelsColor (&pixels, offs_re, offs_im, scale);
-        delta_time = clock.restart().asSeconds();
-
         TransformView (&offs_re, &offs_im, VIEW_OFFSET_VAL,
                        &scale, &need_update);
+
+        clock.restart();
+        SetPixelColor (&pixels, offs_re, offs_im, scale);
+        delta_time = clock.restart().asSeconds();
 
         SetFpsPhrase (&text, delta_time);
 
@@ -52,7 +52,10 @@ int main ()
         printf ("the y offset %0.6lg\n", offs_im);
         printf ("the scale    %0.6lg\n", scale);
 
+        float time = 0;
         PrintWindow (&window, pixels, text);
+        time = clock.restart().asSeconds();
+        printf ("the time consumed = %f\n", time);
     }
 
     return 0;
@@ -61,18 +64,22 @@ int main ()
 void TransformView (float* x_coord, float* y_coord, int step,
                     float* scale, bool* need_update)
 {
-    if (IS_PRESSED(A)) {*x_coord += step; *need_update = true;}
-    if (IS_PRESSED(D)) {*x_coord -= step; *need_update = true;}
-    if (IS_PRESSED(S)) {*y_coord -= step; *need_update = true;}
-    if (IS_PRESSED(W)) {*y_coord += step; *need_update = true;}
+    if (IS_PRESSED(A)) {*x_coord += step / *scale; *need_update = true;}
+    if (IS_PRESSED(D)) {*x_coord -= step / *scale; *need_update = true;}
+    if (IS_PRESSED(S)) {*y_coord -= step / *scale; *need_update = true;}
+    if (IS_PRESSED(W)) {*y_coord += step / *scale; *need_update = true;}
 
     if (IS_PRESSED(Equal)) {
-        *scale /= SCALE_MULTIPLIER;
+        *scale      *= SCALE_MULTIPLIER;
+        // *x_coord    *= *scale;
+        // *y_coord    *= *scale;
         *need_update = true;
     }
 
     if (IS_PRESSED(Dash)) {
-        *scale *= SCALE_MULTIPLIER;
+        *scale      /= SCALE_MULTIPLIER;
+        // *x_coord    /= *scale;
+        // *y_coord    /= *scale;
         *need_update = true;
     }
 }
@@ -80,7 +87,7 @@ void TransformView (float* x_coord, float* y_coord, int step,
 void SetFpsPhrase (sf::Text* text, float delta_time)
 {
     float fps = 1 / delta_time;
-    printf("fps = %.2lg\n", fps);
+    printf("fps = %lg\n", fps);
 
     char fps_phrase[21] = {};
     sprintf (fps_phrase, "FPS = %.2lg", fps);
@@ -90,6 +97,7 @@ void SetFpsPhrase (sf::Text* text, float delta_time)
 
 void PrintWindow (sf::RenderWindow* window, sf::VertexArray pixels, sf::Text text)
 {
+    float time = 0;
     printf("window draw start\n");
 
     window->clear ();
@@ -97,5 +105,5 @@ void PrintWindow (sf::RenderWindow* window, sf::VertexArray pixels, sf::Text tex
     window->draw (text);
     window->display ();
 
-    printf("window draw end\n");
+    printf("window draw end with consumed time = %f\n", time);
 }

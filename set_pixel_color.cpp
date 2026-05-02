@@ -7,19 +7,16 @@ const int OFFS_CENT_IM = ROWS_NUM / 2;
 const int RADIUS       = 2;
 const int NUM_TO_STOP_CALC = 256;
 
-void SetPixelsColor (sf::VertexArray* pixels,
+void SetPixelColor (sf::VertexArray* pixels,
                      float offs_re, float offs_im, float scale)
 {
-    float general_offs_re = OFFS_CENT_RE + offs_re;
-    float general_offs_im = OFFS_CENT_IM + offs_im;
+    float multiplier_x = 4 / (float) COLS_NUM;
+    float multiplier_y = 4 / (float) ROWS_NUM;
 
-    float multiplier_x = 4 / (float) COLS_NUM * scale;
-    float multiplier_y = 4 / (float) ROWS_NUM * scale;
-
-    float x_angle_coef = multiplier_x;
-    float y_angle_coef = multiplier_y;
-    float x_free_coef  = multiplier_x * general_offs_re;
-    float y_free_coef  = multiplier_y * general_offs_im;
+    float x_angle_coef = multiplier_x / scale;
+    float y_angle_coef = multiplier_y / scale;
+    float x_free_coef  = multiplier_x * (OFFS_CENT_RE / scale + offs_re);
+    float y_free_coef  = multiplier_y * (OFFS_CENT_IM / scale + offs_im);
 
     for (int x = 0; x < COLS_NUM; ++x) {
         for (int y = 0; y < ROWS_NUM; ++y) {
@@ -44,7 +41,7 @@ void SetPixelsColor (sf::VertexArray* pixels,
                 continue;
             }
 
-            sf::Color color = sf::Color ((-n * 3) % 256, n, (n * 23) % 256);
+            sf::Color color = sf::Color ((-n * 3) % 256, n, (-n * 23) % 256);
             (*pixels)[x * COLS_NUM + y] = sf::Vertex (sf::Vector2f (x, y), color);
         }
     }
