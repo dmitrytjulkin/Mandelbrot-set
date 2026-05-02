@@ -71,15 +71,11 @@ void TransformView (float* x_coord, float* y_coord, int step,
 
     if (IS_PRESSED(Equal)) {
         *scale      *= SCALE_MULTIPLIER;
-        // *x_coord    *= *scale;
-        // *y_coord    *= *scale;
         *need_update = true;
     }
 
     if (IS_PRESSED(Dash)) {
         *scale      /= SCALE_MULTIPLIER;
-        // *x_coord    /= *scale;
-        // *y_coord    /= *scale;
         *need_update = true;
     }
 }

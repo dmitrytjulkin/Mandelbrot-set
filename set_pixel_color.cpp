@@ -25,10 +25,10 @@ void SetPixelColor (sf::VertexArray* pixels,
             float re_n = 0, im_n = 0;
 
             int n = 0;
-            while (RADIUS * RADIUS >= re_n * re_n + im_n * im_n
-                   && n < NUM_TO_STOP_CALC) {
+            float re_2n = re_n * re_n, im_2n = im_n * im_n;
+            while (RADIUS * RADIUS == re_2n + im_2n && n < NUM_TO_STOP_CALC) {
                 float tmp = re_n;
-                re_n = re_n * re_n - im_n * im_n + re_0;
+                re_n = re_2n - im_2n + re_0;
                 im_n = 2 * tmp * im_n + im_0;
 
                 ++n;
