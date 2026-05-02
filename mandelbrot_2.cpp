@@ -1,4 +1,6 @@
 #include <SFML/Graphics.hpp>
+#include <vector>
+#include <unistd.h>
 
 const int COLS_NUM     = 500;
 const int ROWS_NUM     = 500;
@@ -17,12 +19,11 @@ void TransformView  (float* x_coord, float* y_coord, int step,
                      float* scale, bool* need_update);
 void SetPixelsColor (sf::VertexArray* pixels,
                      float offs_re, float offs_im, float scale);
-void SetFpsPhrase   (sf::Text text, float delta_time, sf::Font arial_font);
-void PrintWindow    (sf::RenderWindow* window, sf::VertexArray pixels, sf::Text text);
 
 int main ()
 {
     sf::RenderWindow window (sf::VideoMode (COLS_NUM, ROWS_NUM), "Mandelbrot");
+    printf("Window created\n");
     window.setFramerateLimit(0);
 
     sf::VertexArray pixels (sf::Points, COLS_NUM * ROWS_NUM);
@@ -41,23 +42,34 @@ int main ()
 
     while (window.isOpen ())
     {
-        clock.restart();
         SetPixelsColor (&pixels, offs_re, offs_im, scale);
-        delta_time = clock.restart().asSeconds();
 
         TransformView (&offs_re, &offs_im, VIEW_OFFSET_VAL,
                        &scale, &need_update);
 
-        SetFpsPhrase (text, delta_time, arial_font);
+        delta_time = clock.restart().asSeconds();
+        fps = 1 / delta_time;
+        printf("fps = %.2lg\n", fps);
+
+        char fps_phrase[21] = {};
+        sprintf (fps_phrase, "FPS = %.2lg", fps);
+        text.setFont (arial_font);
+        text.setString (fps_phrase);
+        text.setCharacterSize (48);
+        text.setPosition (10.f, 10.f);
 
         if (!need_update) continue;
-        need_update = false;
-
         printf ("the x offset %0.6lg\n", offs_re);
         printf ("the y offset %0.6lg\n", offs_im);
         printf ("the scale    %0.6lg\n", scale);
 
-        PrintWindow (&window, pixels, text);
+        printf("window draw start\n");
+        need_update = false;
+        window.clear ();
+        window.draw (pixels);
+        window.draw (text);
+        window.display ();
+        printf("window draw end\n");
     }
 
     return 0;
@@ -66,21 +78,20 @@ int main ()
 void SetPixelsColor (sf::VertexArray* pixels,
                      float offs_re, float offs_im, float scale)
 {
-    float general_offs_re = OFFS_CENT_RE + offs_re;
-    float general_offs_im = OFFS_CENT_IM + offs_im;
+    float general_offs_re = (OFFS_CENT_RE + offs_re) * scale;
+    float general_offs_im = (OFFS_CENT_IM + offs_im) * scale;
 
-    float multiplier_x = 4.f / COLS_NUM * scale;
-    float multiplier_y = 4.f / ROWS_NUM * scale;
+    const int buf_size = 4;
+    int X[buf_size] = {};
+    int Y[buf_size] = {};
 
-    float x_angle_coef = multiplier_x;
-    float y_angle_coef = multiplier_y;
-    float x_free_coef  = multiplier_x * general_offs_re;
-    float y_free_coef  = multiplier_y * general_offs_im;
+    for (int x = 0; x <= COLS_NUM - buf_size; x += buf_size) {
+        for (int y = 0; y <= ROWS_NUM - buf_size; y += buf_size) {
+            float X_0[4] = {};
+            float Y_0[4] = {y};
 
-    for (int x = 0; x < COLS_NUM; ++x) {
-        for (int y = 0; y < ROWS_NUM; ++y) {
-            float re_0 = x_angle_coef * x - x_free_coef;
-            float im_0 = y_angle_coef * y - y_free_coef;
+            float re_0 = (scale * x - general_offs_re) * 4 / COLS_NUM;
+            float im_0 = (scale * y - general_offs_im) * 4 / ROWS_NUM;
             float re_n = 0, im_n = 0;
 
             int n = 0;
@@ -123,30 +134,4 @@ void TransformView (float* x_coord, float* y_coord, int step,
         *scale *= SCALE_MULTIPLIER;
         *need_update = true;
     }
-}
-
-void SetFpsPhrase (sf::Text text, float delta_time, sf::Font arial_font)
-{
-    float fps = 1 / delta_time;
-    printf("fps = %.2lg\n", fps);
-
-    char fps_phrase[21] = {};
-    sprintf (fps_phrase, "FPS = %.2lg", fps);
-
-    text.setFont (arial_font);
-    text.setString (fps_phrase);
-    text.setCharacterSize (36);
-    text.setPosition (10.f, 10.f);
-}
-
-void PrintWindow (sf::RenderWindow* window, sf::VertexArray pixels, sf::Text text)
-{
-    printf("window draw start\n");
-
-    window->clear ();
-    window->draw (pixels);
-    window->draw (text);
-    window->display ();
-
-    printf("window draw end\n");
 }
