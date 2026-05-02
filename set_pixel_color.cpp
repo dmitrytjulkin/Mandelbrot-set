@@ -44,7 +44,7 @@ void SetPixelsColor (sf::VertexArray* pixels,
                 continue;
             }
 
-            sf::Color color = sf::Color (n, (n * 210) % 256, (n * 123) % 256);
+            sf::Color color = sf::Color ((-n * 3) % 256, n, (n * 23) % 256);
             (*pixels)[x * COLS_NUM + y] = sf::Vertex (sf::Vector2f (x, y), color);
         }
     }

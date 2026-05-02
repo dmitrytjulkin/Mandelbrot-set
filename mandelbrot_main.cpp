@@ -9,7 +9,7 @@ const int VIEW_OFFSET_VAL  = 50;
 
 void TransformView  (float* x_coord, float* y_coord, int step,
                      float* scale, bool* need_update);
-void SetFpsPhrase   (sf::Text* text, float delta_time, sf::Font arial_font);
+void SetFpsPhrase   (sf::Text* text, float delta_time);
 void PrintWindow    (sf::RenderWindow* window, sf::VertexArray pixels, sf::Text text);
 
 int main ()
@@ -43,7 +43,7 @@ int main ()
         TransformView (&offs_re, &offs_im, VIEW_OFFSET_VAL,
                        &scale, &need_update);
 
-        SetFpsPhrase (&text, delta_time, arial_font);
+        SetFpsPhrase (&text, delta_time);
 
         if (!need_update) continue;
         need_update = false;
@@ -61,23 +61,10 @@ int main ()
 void TransformView (float* x_coord, float* y_coord, int step,
                     float* scale, bool* need_update)
 {
-    if (IS_PRESSED(A)) {*x_coord += step; *need_update = true;}
-    if (IS_PRESSED(D)) {*x_coord -= step; *need_update = true;}
-    if (IS_PRESSED(S)) {*y_coord -= step; *need_update = true;}
-    if (IS_PRESSED(W)) {*y_coord += step; *need_update = true;}
 
-    if (IS_PRESSED(Equal)) {
-        *scale /= SCALE_MULTIPLIER;
-        *need_update = true;
-    }
-
-    if (IS_PRESSED(Dash)) {
-        *scale *= SCALE_MULTIPLIER;
-        *need_update = true;
-    }
 }
 
-void SetFpsPhrase (sf::Text* text, float delta_time, sf::Font arial_font)
+void SetFpsPhrase (sf::Text* text, float delta_time)
 {
     float fps = 1 / delta_time;
     printf("fps = %.2lg\n", fps);
