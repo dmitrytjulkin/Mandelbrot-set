@@ -2,11 +2,11 @@
 
 #include "mandelbrot.h"
 
-const int OFFS_CENT_RE = COLS_NUM / 2;
-const int OFFS_CENT_IM = ROWS_NUM / 2;
-const int RADIUS       = 2;
+const int OFFS_CENT_RE     = COLS_NUM / 2;
+const int OFFS_CENT_IM     = ROWS_NUM / 2;
+const int RADIUS           = 2;
 const int NUM_TO_STOP_CALC = 256;
-const int BUF_SIZE = 4;
+const int BUF_SIZE         = 4;
 
 void SetPixelColorBy4 (sf::VertexArray* pixels,
                        float offs_re, float offs_im, float scale)
