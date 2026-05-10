@@ -6,7 +6,7 @@ const int ROWS_NUM     = 500;
 void SetPixelColor (sf::VertexArray* pixels,
                      float offs_re, float offs_im, float scale);
 
-void SetPixelColorBy4 (sf::VertexArray* pixels,
+void SetPixelColorBuffered (sf::VertexArray* pixels, const int buf_len,
                        float offs_re, float offs_im, float scale);
 
 void SetPixelColorIntrensics (sf::VertexArray* pixels,

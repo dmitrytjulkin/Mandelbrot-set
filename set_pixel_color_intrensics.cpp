@@ -6,7 +6,7 @@
 const int OFFS_CENT_RE     = COLS_NUM / 2;
 const int OFFS_CENT_IM     = ROWS_NUM / 2;
 const int RADIUS_2         = 4;
-const int MAX_ITER_VAL = 256;
+const int MAX_ITER_VAL     = 256;
 const int BUF_SIZE         = 8;
 
 void ColorPixels (sf::VertexArray* pixels, __m256i x_vec, __m256i y_vec, __m256i n_vec);
@@ -35,7 +35,7 @@ void SetPixelColorBy4 (sf::VertexArray* pixels,
 
     __m256i x_vec = {};
     __m256i y_vec = {};
-    __m256i i_vec  = {};
+    __m256i i_vec = {};
 
     __m256 re0_vec = {};
     __m256 im0_vec = {};
@@ -118,9 +118,9 @@ void ColorPixels (sf::VertexArray* pixels, __m256i x_vec, __m256i y_vec, __m256i
     _mm256_store_si256 ((__m256i*) n_arr, n_vec);
 
     for (int i = 0; i < BUF_SIZE; i++) {
-        sf::Color color = sf::Color::Black;
+        sf::Color color = sf::Color::White;
 
-        if (n_arr[i] < MAX_ITER_VAL)
+        if (n_arr[i] >= MAX_ITER_VAL)
             sf::Color color = sf::Color ((-n_arr[i] * 3) % 256, n_arr[i], (-n_arr[i] * 23) % 256);
 
         (*pixels)[x_arr[i] * COLS_NUM + y_arr[i]] =

@@ -41,7 +41,8 @@ int main ()
 
         clock.restart();
         // SetPixelColor (&pixels, offs_re, offs_im, scale);
-        SetPixelColorBy4 (&pixels, offs_re, offs_im, scale);
+        // SetPixelColorBuffered (&pixels, 4, offs_re, offs_im, scale);
+        SetPixelColorBuffered (&pixels, 8, offs_re, offs_im, scale);
         // SetPixelColorIntrensics (&pixels, offs_re, offs_im, scale);
         delta_time = clock.restart().asSeconds();
 
