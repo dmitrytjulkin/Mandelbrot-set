@@ -10,8 +10,10 @@ const int NUM_TO_STOP_CALC = 256;
 void SetPixelColor (sf::VertexArray* pixels,
                      float offs_re, float offs_im, float scale)
 {
-    float multiplier_x = 4 / (float) COLS_NUM;
-    float multiplier_y = 4 / (float) ROWS_NUM;
+    sf::Color color = {};
+
+    float multiplier_x = RAND_COEF / (float) COLS_NUM;
+    float multiplier_y = RAND_COEF / (float) ROWS_NUM;
 
     float x_angle_coef = multiplier_x / scale;
     float y_angle_coef = multiplier_y / scale;
@@ -35,13 +37,15 @@ void SetPixelColor (sf::VertexArray* pixels,
             }
 
             if (n >= NUM_TO_STOP_CALC) {
-                sf::Color color = sf::Color::Black;
+                color = sf::Color::Black;
                 (*pixels)[x * COLS_NUM + y] = sf::Vertex (sf::Vector2f (x, y), color);
 
                 continue;
             }
 
-            sf::Color color = sf::Color ((-n * 3) % 256, n, (-n * 23) % 256);
+            color = sf::Color ((n * RED_COEF) % RED_MOD,
+                               (n * GREEN_COEF) % GREEN_MOD,
+                               (n * BLUE_COEF) % BLUE_MOD);
             (*pixels)[x * COLS_NUM + y] = sf::Vertex (sf::Vector2f (x, y), color);
         }
     }

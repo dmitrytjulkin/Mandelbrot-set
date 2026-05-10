@@ -5,6 +5,11 @@
 const int SCALE_MULTIPLIER = 2;
 const int VIEW_OFFSET_VAL  = 25;
 
+const int CHAR_SIZE = 36;
+const float TEXT_POS_X = 5;
+const float TEXT_POS_Y = 5;
+const int LONGEST_FPS_PHRASE = 21;
+
 #define IS_PRESSED(key) sf::Keyboard::isKeyPressed(sf::Keyboard::key)
 
 void TransformView  (float* x_coord, float* y_coord, int step,
@@ -23,10 +28,12 @@ int main ()
 
     sf::Text text = {};
     sf::Font arial_font = {};
-    arial_font.loadFromFile ("/root/TDA projects/Mandelbrot-set/arial.ttf");
+    if (!arial_font.loadFromFile("/home/tyulkin_dmitriy/TDA projects/Mandelbrot-set/arial.ttf"))
+       printf("ERROR LOADING FONT\n");
     text.setFont (arial_font);
-    text.setCharacterSize (36);
-    text.setPosition (5.f, 5.f);
+    text.setCharacterSize (CHAR_SIZE);
+    text.setPosition (TEXT_POS_X, TEXT_POS_Y);
+    text.setFillColor(sf::Color::White);
 
     float offs_re = 0, offs_im = 0;
     float scale       = 1;
@@ -88,7 +95,7 @@ void SetFpsPhrase (sf::Text* text, float delta_time)
     float fps = 1 / delta_time;
     printf("fps = %lg\n", fps);
 
-    char fps_phrase[21] = {};
+    char fps_phrase[LONGEST_FPS_PHRASE] = {};
     sprintf (fps_phrase, "FPS = %.2lg", fps);
 
     text->setString (fps_phrase);

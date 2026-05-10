@@ -10,8 +10,8 @@ const int NUM_TO_STOP_CALC = 256;
 void SetPixelColorBuffered (sf::VertexArray* pixels, const int buf_size,
                        float offs_re, float offs_im, float scale)
 {
-    float multiplier_x = 4 / (float) COLS_NUM;
-    float multiplier_y = 4 / (float) ROWS_NUM;
+    float multiplier_x = RAND_COEF / (float) COLS_NUM;
+    float multiplier_y = RAND_COEF / (float) ROWS_NUM;
 
     float x_angle_coef = multiplier_x / scale;
     float y_angle_coef = multiplier_y / scale;
@@ -71,7 +71,9 @@ void SetPixelColorBuffered (sf::VertexArray* pixels, const int buf_size,
                     continue;
                 }
 
-                sf::Color color = sf::Color ((-n[i] * 3) % 256, n[i], (-n[i] * 23) % 256);
+                color = sf::Color ((n[i] * RED_COEF) % RED_MOD,
+                                   (n[i] * GREEN_COEF) % GREEN_MOD,
+                                   (n[i] * BLUE_COEF) % BLUE_MOD);
                 (*pixels)[x_arr[i] * COLS_NUM + y_arr[i]] =
                         sf::Vertex (sf::Vector2f (x_arr[i], y_arr[i]), color);
             }
