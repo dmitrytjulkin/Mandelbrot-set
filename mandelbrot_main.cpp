@@ -15,7 +15,8 @@ const int LONGEST_FPS_PHRASE = 21;
 void TransformView  (float* x_coord, float* y_coord, int step,
                      float* scale, bool* need_update);
 void SetFpsPhrase   (sf::Text* text, float delta_time);
-void PrintWindow    (sf::RenderWindow* window, sf::VertexArray pixels, sf::Text text);
+void PrintWindow    (sf::RenderWindow* window, sf::VertexArray pixels,
+                     sf::Text text);
 
 int main ()
 {
@@ -47,10 +48,7 @@ int main ()
                        &scale, &need_update);
 
         clock.restart();
-        // SetPixelColor (&pixels, offs_re, offs_im, scale);
-        // SetPixelColorBuffered (&pixels, 4, offs_re, offs_im, scale);
-        // SetPixelColorBuffered (&pixels, 8, offs_re, offs_im, scale);
-        SetPixelColorIntrensics (&pixels, offs_re, offs_im, scale);
+        SetPixelColor (&pixels, offs_re, offs_im, scale);
         delta_time = clock.restart().asSeconds();
 
         SetFpsPhrase (&text, delta_time);
@@ -101,7 +99,8 @@ void SetFpsPhrase (sf::Text* text, float delta_time)
     text->setString (fps_phrase);
 }
 
-void PrintWindow (sf::RenderWindow* window, sf::VertexArray pixels, sf::Text text)
+void PrintWindow (sf::RenderWindow* window, sf::VertexArray pixels,
+                  sf::Text text)
 {
     float time = 0;
     printf("window draw start\n");

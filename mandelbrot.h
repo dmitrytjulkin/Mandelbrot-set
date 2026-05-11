@@ -12,12 +12,4 @@ const int BLUE_COEF  = -23;
 const int BLUE_MOD   = 256;
 
 void SetPixelColor (sf::VertexArray* pixels,
-                     float offs_re, float offs_im, float scale);
-
-void SetPixelColorBuffered (sf::VertexArray* pixels, const int buf_len,
-                       float offs_re, float offs_im, float scale);
-
-void SetPixelColorIntrensics (sf::VertexArray* pixels,
-                              float offs_re, float offs_im, float scale);
-
-
+                    float offs_re, float offs_im, float scale);

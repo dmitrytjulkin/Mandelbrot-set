@@ -9,11 +9,12 @@ const int RADIUS_2         = 4;
 const int MAX_ITER_VAL     = 256;
 const int BUF_SIZE         = 8;
 
+const int SHIFT_CONST      = 31;
 
 void ColorPixels (sf::VertexArray* pixels, __m256i x_vec, __m256i y_vec, __m256i n_vec);
 __m256i FindMandelbrotNumber (__m256 re0_vec, __m256 im0_vec);
 
-void SetPixelColorIntrensics (sf::VertexArray* pixels,
+void SetPixelColor (sf::VertexArray* pixels,
                        float offs_re, float offs_im, float scale)
 {
     float multiplier_x = RAND_COEF / (float) COLS_NUM;
@@ -93,7 +94,7 @@ __m256i FindMandelbrotNumber (__m256 re0_vec, __m256 im0_vec)
 
         cmprbl_vec      = _mm256_add_ps (re2n_vec, im2n_vec);
         cmp_res_vec     = _mm256_castps_si256 (_mm256_cmp_ps (_mm256_set1_ps (RADIUS_2), cmprbl_vec, _CMP_GT_OS));
-        cmp_res_vec     = _mm256_srli_epi32 (cmp_res_vec, 31);
+        cmp_res_vec     = _mm256_srli_epi32 (cmp_res_vec, SHIFT_CONST);
         is_pixel_in_vec = _mm256_and_si256 (cmp_res_vec, is_pixel_in_vec);
         n_vec           = _mm256_add_epi32 (n_vec, is_pixel_in_vec);
 
@@ -114,7 +115,7 @@ void ColorPixels (sf::VertexArray* pixels, __m256i x_vec, __m256i y_vec, __m256i
     _mm256_storeu_si256 ((__m256i*) n_arr, n_vec);
 
     for (int i = 0; i < BUF_SIZE; i++) {
-        sf::Color color;
+        sf::Color color = {};
 
         if (n_arr[i] <= MAX_ITER_VAL)
             color = sf::Color ((n_arr[i] * RED_COEF) % RED_MOD,
