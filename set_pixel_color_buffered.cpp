@@ -9,7 +9,7 @@ const int NUM_TO_STOP_CALC = 256;
 
 const int BUF_SIZE = 4;
 
-void FindMandelbrotNumber (int** n_arr, float* re0_arr, float* im0_arr);
+void FindMandelbrotNumber (int* n_arr, float* re0_arr, float* im0_arr);
 void ColorPixels (sf::VertexArray* pixels,
                   int* x_arr, int* y_arr, int* n_arr);
 
@@ -28,8 +28,6 @@ void SetPixelColor (sf::VertexArray* pixels,
     float y_angle_arr[BUF_SIZE] = {};
     float x_free_arr[BUF_SIZE]  = {};
     float y_free_arr[BUF_SIZE]  = {};
-
-    int n_arr[BUF_SIZE] = {};
 
     for (int k = 0; k < BUF_SIZE; ++k) x_angle_arr[k] = x_angle_coef;
     for (int k = 0; k < BUF_SIZE; ++k) y_angle_arr[k] = y_angle_coef;
@@ -50,21 +48,21 @@ void SetPixelColor (sf::VertexArray* pixels,
             for (int i = 0; i < BUF_SIZE; ++i)
                 im0_arr[i] = y_arr[i] * y_angle_arr[i] - y_free_arr[i];
 
-            FindMandelbrotNumber (&n_arr, BUF_SIZE, re0_arr, im0_arr);
+            int n_arr[BUF_SIZE] = {};
+            FindMandelbrotNumber (n_arr, re0_arr, im0_arr);
 
-            ColorPixels (pixels, BUF_SIZE, x_arr, y_arr, n_arr);
+            ColorPixels (pixels, x_arr, y_arr, n_arr);
         }
     }
 }
 
-void FindMandelbrotNumber (int **n_arr, float* re0_arr, float* im0_arr)
+void FindMandelbrotNumber (int* n_arr, float* re0_arr, float* im0_arr)
 {
-    float ren_arr[BUF_SIZE] = {};
-    float imn_arr[BUF_SIZE] = {};
+    float ren_arr[BUF_SIZE]  = {};
+    float imn_arr[BUF_SIZE]  = {};
     float re2n_arr[BUF_SIZE] = {};
     float im2n_arr[BUF_SIZE] = {};
 
-    int (*n_arr)[BUF_SIZE] = {};
     for (int i = 0; i < BUF_SIZE; ++i) {
         do {
             float tmp = 2 * ren_arr[i];
@@ -74,8 +72,8 @@ void FindMandelbrotNumber (int **n_arr, float* re0_arr, float* im0_arr)
             for (int j = 0; j < BUF_SIZE; ++j) re2n_arr[j] = ren_arr[j] * ren_arr[j];
             for (int j = 0; j < BUF_SIZE; ++j) im2n_arr[j] = imn_arr[j] * imn_arr[j];
 
-            ++(*n_arr)[i];
-        } while (RADIUS * RADIUS >= re2n_arr[i] + im2n_arr[i] && (*n_arr)[i] < NUM_TO_STOP_CALC);
+            ++n_arr[i];
+        } while (RADIUS * RADIUS >= re2n_arr[i] + im2n_arr[i] && n_arr[i] < NUM_TO_STOP_CALC);
     }
 }
 
