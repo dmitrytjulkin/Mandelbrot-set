@@ -2,12 +2,12 @@
 
 #include "mandelbrot.h"
 
-const int SCALE_MULTIPLIER = 2;
-const int VIEW_OFFSET_VAL  = 25;
+const float SCALE_MULTIPLIER = 1.2;
+const int VIEW_OFFSET_VAL    = 25;
 
-const int CHAR_SIZE = 36;
-const float TEXT_POS_X = 5;
-const float TEXT_POS_Y = 5;
+const int CHAR_SIZE          = 26;
+const float TEXT_POS_X       = 5;
+const float TEXT_POS_Y       = 5;
 const int LONGEST_FPS_PHRASE = 21;
 
 #define IS_PRESSED(key) sf::Keyboard::isKeyPressed(sf::Keyboard::key)
